@@ -16,6 +16,7 @@ class RegionStorage(private val plugin: JavaPlugin) {
     private val gson = Gson()
     private val regionsFile = File(plugin.dataFolder, "regions.json")
     private val regions = mutableMapOf<String, List<Location>>()
+    private val availableRegionNames = mutableSetOf<String>()
     private var regionCounter = 1
 
     init {
@@ -41,7 +42,7 @@ class RegionStorage(private val plugin: JavaPlugin) {
 
     fun saveRegion(playerId: UUID) {
         val corners = regions[playerId.toString()] ?: return
-        val regionName = "FoodRegion${regionCounter++}"
+        val regionName = getNextAvailableRegionName()
         regions[regionName] = corners
         regions.remove(playerId.toString())
         saveRegions(regions)
@@ -49,6 +50,7 @@ class RegionStorage(private val plugin: JavaPlugin) {
 
     fun removeRegion(regionName: String) {
         regions.remove(regionName)
+        availableRegionNames.add(regionName)
         saveRegions(regions)
     }
 
@@ -98,6 +100,13 @@ class RegionStorage(private val plugin: JavaPlugin) {
         FileWriter(regionsFile).use { writer ->
             gson.toJson(serializedRegions, writer)
         }
+    }
+
+    private fun getNextAvailableRegionName(): String {
+        if (availableRegionNames.isEmpty()) {
+            return "FoodRegion${regionCounter++}"
+        }
+        return availableRegionNames.minByOrNull { it.substring(10).toInt() } ?: "FoodRegion${regionCounter++}"
     }
 
     private data class SerializedLocation(

@@ -15,7 +15,8 @@ class RegionStorage(private val plugin: JavaPlugin) {
 
     private val gson = Gson()
     private val regionsFile = File(plugin.dataFolder, "regions.json")
-    private val regions = mutableMapOf<UUID, List<Location>>()
+    private val regions = mutableMapOf<String, List<Location>>()
+    private var regionCounter = 1
 
     init {
         if (!regionsFile.exists()) {
@@ -27,24 +28,27 @@ class RegionStorage(private val plugin: JavaPlugin) {
     }
 
     fun addCorner(playerId: UUID, location: Location) {
-        val corners = regions.getOrDefault(playerId, mutableListOf()) as MutableList<Location>
+        val corners = regions.getOrDefault(playerId.toString(), mutableListOf()) as MutableList<Location>
         if (corners.size < 4) {
             corners.add(location)
-            regions[playerId] = corners
+            regions[playerId.toString()] = corners
         }
     }
 
     fun getCorners(playerId: UUID): List<Location> {
-        return regions[playerId] ?: emptyList()
+        return regions[playerId.toString()] ?: emptyList()
     }
 
     fun saveRegion(playerId: UUID) {
-        val corners = regions[playerId] ?: return
+        val corners = regions[playerId.toString()] ?: return
+        val regionName = "FoodRegion${regionCounter++}"
+        regions[regionName] = corners
+        regions.remove(playerId.toString())
         saveRegions(regions)
     }
 
-    fun removeRegion(playerId: UUID) {
-        regions.remove(playerId)
+    fun removeRegion(regionName: String) {
+        regions.remove(regionName)
         saveRegions(regions)
     }
 
@@ -55,6 +59,10 @@ class RegionStorage(private val plugin: JavaPlugin) {
             }
         }
         return false
+    }
+
+    fun getRegionNames(): List<String> {
+        return regions.keys.toList()
     }
 
     private fun isLocationInRegion(location: Location, corners: List<Location>): Boolean {
@@ -71,18 +79,20 @@ class RegionStorage(private val plugin: JavaPlugin) {
     private fun loadRegions() {
         if (!regionsFile.exists()) return
 
-        val type: Type = object : TypeToken<MutableMap<UUID, List<SerializedLocation>>>() {}.type
-        val serializedRegions = gson.fromJson<MutableMap<UUID, List<SerializedLocation>>>(FileReader(regionsFile), type) ?: mutableMapOf()
+        val type: Type = object : TypeToken<MutableMap<String, List<SerializedLocation>>>() {}.type
+        val serializedRegions = gson.fromJson<MutableMap<String, List<SerializedLocation>>>(FileReader(regionsFile), type) ?: mutableMapOf()
 
-        for ((playerId, serializedLocations) in serializedRegions) {
-            regions[playerId] = serializedLocations.map { it.toLocation(plugin) }
+        for ((regionName, serializedLocations) in serializedRegions) {
+            regions[regionName] = serializedLocations.map { it.toLocation(plugin) }
         }
+
+        regionCounter = regions.keys.filter { it.startsWith("FoodRegion") }.map { it.substring(10).toInt() }.maxOrNull()?.plus(1) ?: 1
     }
 
-    private fun saveRegions(regions: MutableMap<UUID, List<Location>>) {
-        val serializedRegions = mutableMapOf<UUID, List<SerializedLocation>>()
-        for ((playerId, locations) in regions) {
-            serializedRegions[playerId] = locations.map { SerializedLocation.fromLocation(it) }
+    private fun saveRegions(regions: MutableMap<String, List<Location>>) {
+        val serializedRegions = mutableMapOf<String, List<SerializedLocation>>()
+        for ((regionName, locations) in regions) {
+            serializedRegions[regionName] = locations.map { SerializedLocation.fromLocation(it) }
         }
 
         FileWriter(regionsFile).use { writer ->

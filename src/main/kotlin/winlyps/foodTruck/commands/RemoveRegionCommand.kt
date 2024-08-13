@@ -15,14 +15,19 @@ class RemoveRegionCommand(private val storage: RegionStorage) : CommandExecutor 
             return true
         }
 
-        val playerId = sender.uniqueId
-        if (storage.getCorners(playerId).isEmpty()) {
-            sender.sendMessage("You have no food region set.")
+        if (args.isEmpty()) {
+            sender.sendMessage("Usage: /removeregion <regionName>")
             return true
         }
 
-        storage.removeRegion(playerId)
-        sender.sendMessage("Your food region has been removed.")
+        val regionName = args[0]
+        if (!storage.getRegionNames().contains(regionName)) {
+            sender.sendMessage("Region '$regionName' does not exist.")
+            return true
+        }
+
+        storage.removeRegion(regionName)
+        sender.sendMessage("Region '$regionName' has been removed.")
         return true
     }
 }

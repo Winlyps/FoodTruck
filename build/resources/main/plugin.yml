@@ -1,10 +1,12 @@
 name: FoodTruck
 version: '1.0-SNAPSHOT'
 main: winlyps.foodTruck.FoodTruck
-api-version: '1.20'
+api-version: '1.16'
 author: [Winlyps]
 commands:
   foodtruck:
     description: Gives a special golden axe to set the food truck area.
   removeregion:
     description: Removes the food region set by the player.
+    usage: /removeregion <regionName>
+    tab-completer: winlyps.foodTruck.commands.RemoveRegionTabCompleter

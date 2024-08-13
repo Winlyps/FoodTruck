@@ -26,7 +26,8 @@ class RegionListener(private val plugin: FoodTruck, private val storage: RegionS
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         if (event.action != Action.RIGHT_CLICK_BLOCK || event.hand != EquipmentSlot.HAND) return
-        if (event.item?.type != org.bukkit.Material.GOLDEN_AXE) return
+        val item = event.item ?: return
+        if (item.type != org.bukkit.Material.GOLDEN_AXE || item.itemMeta?.displayName != "§6Food Truck Axe") return
 
         val player = event.player
         val location = event.clickedBlock?.location ?: return

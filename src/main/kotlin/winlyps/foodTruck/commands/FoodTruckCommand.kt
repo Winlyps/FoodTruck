@@ -6,6 +6,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import winlyps.foodTruck.storage.RegionStorage
 
 class FoodTruckCommand(private val storage: RegionStorage) : CommandExecutor {
@@ -17,6 +18,15 @@ class FoodTruckCommand(private val storage: RegionStorage) : CommandExecutor {
         }
 
         val goldenAxe = ItemStack(org.bukkit.Material.GOLDEN_AXE)
+        val meta = goldenAxe.itemMeta
+        if (meta != null) {
+            meta.setDisplayName("§6Food Truck Axe")
+            goldenAxe.itemMeta = meta
+        } else {
+            sender.sendMessage("Failed to set item meta for the golden axe.")
+            return true
+        }
+
         sender.inventory.addItem(goldenAxe)
         sender.sendMessage("You received a special golden axe to set the food truck area.")
 

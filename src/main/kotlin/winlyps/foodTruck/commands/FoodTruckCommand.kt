@@ -17,6 +17,11 @@ class FoodTruckCommand(private val storage: RegionStorage) : CommandExecutor {
             return true
         }
 
+        if (!sender.hasPermission("foodtruck.use")) {
+            sender.sendMessage("You do not have permission to use this command.")
+            return true
+        }
+
         val goldenAxe = ItemStack(org.bukkit.Material.GOLDEN_AXE)
         val meta = goldenAxe.itemMeta
         if (meta != null) {

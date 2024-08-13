@@ -15,6 +15,11 @@ class RemoveRegionCommand(private val storage: RegionStorage) : CommandExecutor 
             return true
         }
 
+        if (!sender.hasPermission("foodtruck.removeregion")) {
+            sender.sendMessage("You do not have permission to use this command.")
+            return true
+        }
+
         if (args.isEmpty()) {
             sender.sendMessage("Usage: /removeregion <regionName>")
             return true

@@ -6,7 +6,18 @@ author: [Winlyps]
 commands:
   foodtruck:
     description: Gives a special golden axe to set the food truck area.
+    permission: foodtruck.use
+    permission-message: You do not have permission to use this command.
   removeregion:
     description: Removes the food region set by the player.
     usage: /removeregion <regionName>
     tab-completer: winlyps.foodTruck.commands.RemoveRegionTabCompleter
+    permission: foodtruck.removeregion
+    permission-message: You do not have permission to use this command.
+permissions:
+  foodtruck.use:
+    description: Allows the player to use the /foodtruck command.
+    default: op
+  foodtruck.removeregion:
+    description: Allows the player to use the /removeregion command.
+    default: op
